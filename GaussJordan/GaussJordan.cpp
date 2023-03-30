@@ -31,6 +31,7 @@ int buscarPivote(matriz &miMatriz, int fila, int numFilas);
 
 int main()
 {
+    cout<<"RESOLUCION DE MATRICES\n\n";
     // Definimos el número de variables de nuestro sistema
     const int variables = 3;
     // El número de columnas será el número de variables más su solición para cada ecuación
@@ -47,6 +48,10 @@ int main()
 
     // Imprimimos la solución de la matriz
     ImprimirSolucion(miMatriz);
+    cout<<"\nLas soluciones son:\n";
+    for (int j= 1; j <=variables ; j++) {
+        cout<<"\nX"<<j<<": "<<miMatriz[j-1][variables];
+    }
 
     return 0; // Indicamos que salimos del programa con éxito
 }
@@ -181,21 +186,14 @@ void GaussJordan(matriz &miMatriz){
         if(indicePivote != -1){ // Si se encontraron elementos != 0
             //intercambiar filas actual y fila de pivote)
             intercambiarFilas(miMatriz, i, indicePivote, cols);
-            ImprimirSolucion(miMatriz);
             Dividir(miMatriz, i, cols, filas);
-            ImprimirSolucion(miMatriz);
             Resta(miMatriz, i, cols, filas);
-            ImprimirSolucion(miMatriz);
             if(i==filas-1){
-                int f=filas;
                 float vi;
                 for (int j = 0; j < filas-1; j++) {
-                    f--;
-                    for (int k = 0; k <= f; k++) {
-                        vi=miMatriz[j][k+1];
-                        ImprimirSolucion(miMatriz);
+                    for (int k = j+1; k<filas  ; k++) {
+                        vi=miMatriz[j][k];
                         for (int l = 0; l < cols; l++) {
-                            cout<<vi * miMatriz[k][l]<<"\t";
                             miMatriz[j][l] = miMatriz[j][l] - vi * miMatriz[k][l];
                         }
                     }
