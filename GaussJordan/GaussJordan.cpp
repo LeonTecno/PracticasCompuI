@@ -1,7 +1,5 @@
 #include <iostream>
 #include <array>
-#include <iomanip> //para usar setprecision
-#include <cmath> //para usar trunc
 
 // Añadir std para fácil llamado de funciones
 using namespace std;
@@ -18,33 +16,38 @@ template <typename matriz>
 void GaussJordan(matriz & miMatriz);
 
 template <typename matriz>
+void Resta(matriz & miMatriz);
+
+template <typename matriz>
+void Dividir(matriz & miMatriz);
+
+template <typename matriz>
 void ImprimirSolucion(matriz & miMatriz);
+
+template <typename matriz>
+int buscarPivote(matriz &miMatriz, int fila, int numFilas);
+
 
 
 int main()
 {
-    while (true) {
-        cout<<"\nCALCULADORA DE MATRICES 3X3\n";
-        // Definimos el número de variables de nuestro sistema
-        const int variables = 3;
-        // El número de columnas será el número de variables más su solición para cada ecuación
-        const int columnas = variables + 1;
+    // Definimos el número de variables de nuestro sistema
+    const int variables = 3;
+    // El número de columnas será el número de variables más su solición para cada ecuación
+    const int columnas = variables + 1;
 
-        // Inicializamos la matriz que vamos a ocupar
-        array<array<float, columnas>, variables> miMatriz = {0};
+    // Inicializamos la matriz que vamos a ocupar
+    array <array<float, columnas>, variables> miMatriz = { 0 };
 
-        // Pedimos al usuario que llene la matriz
-        LlenarMatriz(miMatriz);
+    // Pedimos al usuario que llene la matriz
+    LlenarMatriz(miMatriz);
 
-        //Imprimir
-        ImprimirMatriz(miMatriz);
+    // Aplicamos el método de Gauss-Jordan sobre nuestra matriz
+    GaussJordan(miMatriz);
 
-        // Aplicamos el método de Gauss-Jordan sobre nuestra matriz
-        GaussJordan(miMatriz);
+    // Imprimimos la solución de la matriz
+    ImprimirSolucion(miMatriz);
 
-        // Imprimimos la solución de la matriz
-        ImprimirSolucion(miMatriz);
-    }
     return 0; // Indicamos que salimos del programa con éxito
 }
 
@@ -55,7 +58,6 @@ No regresa ningún valor.
 template <typename matriz>
 void LlenarMatriz(matriz & miMatriz)
 {
-    cout<<"\n";
     int variables = miMatriz.size();
     for (int i = 0; i < variables; i++) {
         for (int j = 0; j <= variables; j++) {
@@ -88,38 +90,75 @@ No regresa ningún valor.
 template <typename matriz>
 void ImprimirSolucion(matriz & miMatriz)
 {
+    cout<<"\n\nMatriz Solucion: \n";
     int variables = miMatriz.size();
-    cout<<"Matriz solucion:\n";
     for (int i = 0; i < variables; i++) {
         cout << "[ ";
-        for (int j = 0; j < variables + 1; j++){
-            cout << setprecision( 3 ) << trunc( miMatriz[i][j] * 100 ) / 100 <<"\t";
-        }
+        for (int j = 0; j < variables + 1; j++)
+            cout << miMatriz[i][j] << '\t';
         cout << "]\n";
     }
     //TODO
-    float tip=0;
-    for (int i = 0; i < variables; i++) {
-        for (int j = 0; j < variables; j++){
-            tip=tip+miMatriz[i][j];
+}
+//fila=???
+
+/*
+ * Esta función busca un pivote empleando la técnica de pivoteo parcial
+ * Parámetros: Matriz, fila actual y número de filas.
+ * Salida: Índice de la fila que contiene el pivote. (El pivote se debe posiciónar en la diagonal principal i == j)
+ */
+template <typename matriz> // Se definen dos typenames el primero es para la matriz el segundo para variables
+int buscarPivote(matriz &miMatriz, int fila, int numFilas){
+    int col = fila; // El pivote se ubica en la diagonal principal por lo tanto i = j => fila = fila.
+    int indicePivote = -1;
+    // Se asume que el elemento mayor se encuentra inicialmente en la primero posición
+    float max = miMatriz[fila][col];
+    // Se itera sobre las filas para encontrar el menor elemento
+    for(int i = fila; i<numFilas; i++){ // Itera desde la fila actual hasta numFilas.
+        if(miMatriz[i][col] != 0 & miMatriz[i][col] >= max){ // Si el elemento es distinto de cero y mayor.
+            max = miMatriz[i][col];
+            indicePivote = i;
         }
+
     }
-    if (tip==3.00){
-        cout<<"\nLa matriz tiene solucion\n\n";
-        cout << "x= " << setprecision(4) << trunc(miMatriz[0][3] * 1000) / 1000 << "\n";
-        cout << "y= " << setprecision(4) << trunc(miMatriz[1][3] * 1000) / 1000 << "\n";
-        cout << "z= " << setprecision(4) << trunc(miMatriz[2][3] * 1000) / 1000 << "\n";
+    return indicePivote;
+}
+
+template <typename matriz>
+void intercambiarFilas(matriz &miMatriz, int fila1, int fila2, int cols){
+    // Alternativa: Usar la función swap.
+    for(int j = 0; j < cols; j++){
+        float temp = miMatriz[fila1][j];
+        miMatriz [fila1][j] = miMatriz[fila2][j];
+        miMatriz[fila2][j] = temp;
+
     }
-    else
-        if(miMatriz[1][1]==0&&miMatriz[1][2]==0&&miMatriz[1][3]==0){
-            cout<<"\nLa matriz tiene multiples soluciones\n\n";
-        }
-        else
-            if (miMatriz[2][1]==0&&miMatriz[2][2]==0&&miMatriz[2][3]==0){
-            cout<<"\nLa matriz tiene multiples soluciones\n\n";
+}
+
+template <typename matriz>
+void Resta(matriz &miMatriz, int f, int c, int f1){
+    float iv;
+    for (int i = f+1; i < f1; i++) {
+        if (miMatriz[i][f] != 0) {
+            iv = miMatriz[i][f];
+            for (int j = 0; j < c; j++) {
+                miMatriz[i][j] = miMatriz[i][j] - miMatriz[f][j] * iv;
             }
-            else
-                cout<<"La matriz no tiene solucion\n\n";
+        }
+    }
+}
+
+template <typename matriz>
+void Dividir(matriz &miMatriz, int f, int c, int f1){
+    float div;
+    for (int i = f; i < f1; i++) {
+        if (miMatriz[i][f] != 0) {
+            div = miMatriz[i][f];
+            for (int j = 0; j < c; j++) {
+                miMatriz[i][j] = miMatriz[i][j] / div;
+            }
+        }
+    }
 }
 
 /*
@@ -127,139 +166,49 @@ Implementa el algoritmo de Gauss-Jordan sobre 'miMatriz', finalizando en ella la
 No regresa ningún valor.
 */
 template <typename matriz>
-void GaussJordan(matriz & miMatriz) {
+void GaussJordan(matriz &miMatriz){
 
-    int variables = miMatriz.size();
-    float div = 0;
-    for (int i = 0; i < variables; i++) {
-        div = miMatriz[i][0];
-        for (int j = 0; j < variables + 1; j++) {
-            if (div != 0) {
-                miMatriz[i][j] = miMatriz[i][j] / div;
-            }
-        }
-    }
-    cout << "Paso 1\n";
-    for (int i = 0; i < variables; i++) {
-        cout << "[ ";
-        for (int j = 0; j < variables + 1; j++) {
-            cout << setprecision(3) << trunc(miMatriz[i][j] * 100) / 100 << "\t";
-        }
-        cout << "]\n";
-    }
-    for (int i = 1; i < variables; i++) {
-        if (miMatriz[i][0] != 0) {
-            div = miMatriz[i][0];
-            for (int j = 0; j < variables + 1; j++) {
-                miMatriz[i][j] = miMatriz[i][j] - div * miMatriz[0][j];
-            }
-        }
-    }
-    cout << "Paso 2\n";
-    for (int i = 0; i < variables; i++) {
-        cout << "[ ";
-        for (int j = 0; j < variables + 1; j++) {
-            cout << setprecision(3) << trunc(miMatriz[i][j] * 100) / 100 << "\t";
-        }
-        cout << "]\n";
-    }
-    for (int i = 1; i < variables; i++) {
-        div = miMatriz[i][1];
-        for (int j = 0; j < variables + 1; j++) {
-            if (div != 0) {
-                miMatriz[i][j] = miMatriz[i][j] / div;
-            }
-        }
-    }
-    //Las matrices están en 1 en la 2da variables
-    cout << "Paso 3\n";
-    for (int i = 0; i < variables; i++) {
-        cout << "[ ";
-        for (int j = 0; j < variables + 1; j++) {
-            cout << setprecision(3) << trunc(miMatriz[i][j] * 100) / 100 << "\t";
-        }
-        cout << "]\n";
-    }
+    cout << "Matriz original" << endl;
+    ImprimirMatriz(miMatriz);
 
-    if (miMatriz[1][1] != 0) {
-        div = miMatriz[2][1];
-        for (int j = 0; j < variables + 1; j++) {
-            miMatriz[2][j] = miMatriz[2][j] - div * miMatriz[1][j];
-        }
-    }
-    cout << "Paso 4\n";
-    for (int i = 0; i < variables; i++) {
-        cout << "[ ";
-        for (int j = 0; j < variables + 1; j++) {
-            cout << setprecision(3) << trunc(miMatriz[i][j] * 100) / 100 << "\t";
-        }
-        cout << "]\n";
-    }
-    for (int i = 1; i < variables; i++) {
-        if (miMatriz[i][1] == 0) {
-            div = miMatriz[i][2];
-            for (int j = 2; j < variables + 1; j++) {
-                if (div != 0) {
-                    miMatriz[i][j] = miMatriz[i][j] / div;
+    // Definir número de filas y cols de la matriz
+    int filas = miMatriz.size(), cols = miMatriz.size()+1;
+
+    for(int i = 0; i<miMatriz.size(); i++){
+        // retorna el índice de la fila en la que se encuentra el pivote (elemento mayo != 0)
+        int indicePivote = buscarPivote(miMatriz, i, filas);  // se usa la técnica de pivoteo parcial.
+
+        if(indicePivote != -1){ // Si se encontraron elementos != 0
+            //intercambiar filas actual y fila de pivote)
+            intercambiarFilas(miMatriz, i, indicePivote, cols);
+            ImprimirSolucion(miMatriz);
+            Dividir(miMatriz, i, cols, filas);
+            ImprimirSolucion(miMatriz);
+            Resta(miMatriz, i, cols, filas);
+            ImprimirSolucion(miMatriz);
+            if(i==filas-1){
+                int f=filas;
+                float vi;
+                for (int j = 0; j < filas-1; j++) {
+                    f--;
+                    for (int k = 0; k <= f; k++) {
+                        vi=miMatriz[j][k+1];
+                        ImprimirSolucion(miMatriz);
+                        for (int l = 0; l < cols; l++) {
+                            cout<<vi * miMatriz[k][l]<<"\t";
+                            miMatriz[j][l] = miMatriz[j][l] - vi * miMatriz[k][l];
+                        }
+                    }
                 }
             }
+
         }
-    }
-    cout << "Paso 5\n";
-    for (int i = 0; i < variables; i++) {
-        cout << "[ ";
-        for (int j = 0; j < variables + 1; j++) {
-            cout << setprecision(3) << trunc(miMatriz[i][j] * 100) / 100 << "\t";
+        else{
+            cout << "El sistema no tiene solucion" << endl;
+            exit(0);
         }
-        cout << "]\n";
-    }
-    if (miMatriz[1][1] == 1) {
-        if (miMatriz[2][1] == 0) {
-            div = miMatriz[1][2];
-            for (int j = 0; j < variables + 1; j++) {
-                miMatriz[1][j] = miMatriz[1][j] - div * miMatriz[2][j];
-            }
-        }
-    } else {
-        if (miMatriz[2][1] == 1) {
-            div = miMatriz[2][2];
-            for (int j = 0; j < variables + 1; j++) {
-                miMatriz[2][j] = miMatriz[2][j] - div * miMatriz[1][j];
-            }
-        } else {
-            div = miMatriz[1][2];
-            for (int j = 0; j < variables + 1; j++) {
-                miMatriz[1][j] = miMatriz[1][j] - div * miMatriz[2][j];
-            }
-        }
-    }
-    cout << "Paso 6\n";
-    for (int i = 0; i < variables; i++) {
-        cout << "[ ";
-        for (int j = 0; j < variables + 1; j++) {
-            cout << setprecision(3) << trunc(miMatriz[i][j] * 100) / 100 << "\t";
-        }
-        cout << "]\n";
-    }
-    if (miMatriz[1][1] == 1) {
-        div = miMatriz[0][1];
-        for (int j = 0; j < variables + 1; j++) {
-            miMatriz[0][j] = miMatriz[0][j] - div * miMatriz[1][j];
-        }
-        div = miMatriz[0][2];
-        for (int j = 0; j < variables + 1; j++) {
-            miMatriz[0][j] = miMatriz[0][j] - div * miMatriz[2][j];
-        }
-    }
-    if (miMatriz[2][1] == 1) {
-        div = miMatriz[0][1];
-        for (int j = 0; j < variables + 1; j++) {
-            miMatriz[0][j] = miMatriz[0][j] - div * miMatriz[2][j];
-        }
-        div = miMatriz[0][2];
-        for (int j = 0; j < variables + 1; j++) {
-            miMatriz[0][j] = miMatriz[0][j] - div * miMatriz[1][j];
-        }
-        //TODO
+
+
+        // TODO: Realizar la eliminación de Gauss Jordan
     }
 }
