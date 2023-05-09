@@ -95,7 +95,7 @@ void ImprimirSolucion(matriz & miMatriz)
     cout<<"\nLas soluciones son:\n";
     int variables = miMatriz.size();
     for (int j= 1; j <=variables ; j++) {
-        cout<<"\nX"<<j<<"= "<<miMatriz[j-1][variables];
+        cout<<"\nX"<<j-1<<" = "<<miMatriz[j-1][variables];
     }
     //TODO
 }
